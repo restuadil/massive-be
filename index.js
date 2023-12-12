@@ -1,23 +1,21 @@
 import express from 'express';
 import mysql from 'mysql';
+import cors from 'cors';
+import bodyParser from 'body-parser';
 
-// Inisialisasi Express
 const app = express();
 const port = 3000;
-import bodyParser from 'body-parser';
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-// Konfigurasi koneksi MySQL
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '', // Ganti dengan password MySQL Anda
-    database: 'massive' // Ganti dengan nama database Anda
+    password: '',
+    database: 'massive'
 });
 
-// Koneksi ke MySQL
 db.connect((err) => {
     if (err) {
         console.error('Koneksi ke MySQL gagal: ' + err.stack);
@@ -25,48 +23,37 @@ db.connect((err) => {
     }
     console.log('Terhubung ke MySQL dengan ID ' + db.threadId);
 });
+
 app.get("/", (req, res) => {
     res.send("Hello World!");
-})
+});
 
-// Endpoint GET
-app.get('/api/veterinarians/:id?', (req, res) => {
-    const { id } = req.params;
+app.get('/api/veterinarians', (req, res) => {
+    const searchName = req.query.name;
 
-    if (id) {
-        db.query('SELECT * FROM veterinarians WHERE id = ?', [id], (err, results) => {
-            if (err) {
-                res.status(500).send('Terjadi kesalahan server');
-                return;
-            }
+    let query = 'SELECT * FROM veterinarians';
 
-            if (results.length === 0) {
-                res.status(404).send('Dokter hewan tidak ditemukan');
-            } else {
-                res.json(results[0]);
-            }
-        });
-    } else {
-        db.query('SELECT * FROM veterinarians', (err, results) => {
-            if (err) {
-                res.status(500).send('Terjadi kesalahan server');
-                return;
-            }
-            res.json(results);
-        });
+    if (searchName) {
+        query += ` WHERE name LIKE '%${searchName}%'`;
     }
+
+    db.query(query, (err, results) => {
+        if (err) {
+            res.status(500).send('Terjadi kesalahan server');
+            return;
+        }
+        res.json(results);
+    });
 });
 
 app.post('/api/veterinarians', (req, res) => {
     const newVet = req.body;
 
-    // Pastikan body request berisi data yang benar
     if (!newVet.name || !newVet.img || !newVet.strv || !newVet.specialist || !newVet.star || !newVet.exp || !newVet.price || !newVet.location) {
         res.status(400).send('Data tidak lengkap');
         return;
     }
 
-    // Sisipkan data ke dalam tabel veterinarians
     db.query('INSERT INTO veterinarians SET ?', newVet, (err, result) => {
         if (err) {
             res.status(500).send('Terjadi kesalahan server');
@@ -77,9 +64,6 @@ app.post('/api/veterinarians', (req, res) => {
     });
 });
 
-
-
-// Jalankan server
 app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);
 });
