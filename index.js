@@ -3,6 +3,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import vetRouter from "./routers/veterinarians.Route.js";
+import userRouter from "./routers/user.Route.js";
 const app = express();
 
 app.use(cors());
@@ -18,3 +19,4 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", vetRouter);
+app.use("/api", userRouter);
