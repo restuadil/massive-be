@@ -33,3 +33,66 @@ export const getAllUsers = (req, res) => {
         res.status(500).send("Terjadi kesalahan server");
     }
 }
+
+export const deleteUserById = (req, res) => {
+    try {
+        const userId = req.params.id;
+        db.query("DELETE FROM users WHERE id = ?", userId, (err, result) => {
+            if (err) {
+                res.status(500).send("Terjadi kesalahan server");
+                return;
+            }
+            if (result.affectedRows === 0) {
+                res.status(404).send("User tidak ditemukan");
+                return;
+            }
+            res.status(200).send("User berhasil dihapus");
+        });
+    } catch (error) {
+        res.status(500).send("Terjadi kesalahan server");
+    }
+}
+
+export const updateUserById = (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { username, email, password, img } = req.body;
+        if (!username || !email || !password || !img) {
+            res.status(400).send("Data tidak lengkap");
+            return;
+        }
+        const hashedPassword = bcrypt.hashSync(password, 10);
+        db.query("UPDATE users SET username = ?, email = ?, password = ?, img = ? WHERE id = ?", [username, email, hashedPassword, img, userId], (err, result) => {
+            if (err) {
+                res.status(500).send("Terjadi kesalahan server");
+                return;
+            }
+            if (result.affectedRows === 0) {
+                res.status(404).send("User tidak ditemukan");
+                return;
+            }
+            res.status(200).send("User berhasil diupdate");
+        });
+    } catch (error) {
+        res.status(500).send("Terjadi kesalahan server");
+    }
+}
+
+export const getUserById = (req, res) => {
+    try {
+        const userId = req.params.id;
+        db.query("SELECT * FROM users WHERE id = ?", userId, (err, result) => {
+            if (err) {
+                res.status(500).send("Terjadi kesalahan server");
+                return;
+            }
+            if (result.length === 0) {
+                res.status(404).send("User tidak ditemukan");
+                return;
+            }
+            res.json(result[0]);
+        });
+    } catch (error) {
+        res.status(500).send("Terjadi kesalahan server");
+    }
+}

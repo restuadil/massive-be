@@ -1,6 +1,5 @@
 import db from "../server.js";
 
-
 export const getAllVets = (req, res) => {
     const searchName = req.query.name;
 
