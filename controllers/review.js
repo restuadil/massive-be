@@ -46,4 +46,60 @@ export const getAllReviews = (req, res) => {
     }
 };
 
+export const deleteReviewById = (req, res) => {
+    try {
+        const reviewId = parseInt(req.params.id);
+        db.query("DELETE FROM reviews WHERE id = ?", [reviewId], (err, result) => {
+            if (err) {
+                res.status(500).send("Terjadi kesalahan server");
+                return;
+            }
+            if (result.affectedRows === 0) {
+                res.status(404).send("Review tidak ditemukan");
+                return;
+            }
+            res.sendStatus(204);
+        });
+    } catch (error) {
+        res.status(500).send("Terjadi kesalahan server");
+    }
+}
 
+export const getReviewById = (req, res) => {
+    try {
+        const reviewId = parseInt(req.params.id);
+        db.query("SELECT * FROM reviews WHERE id = ?", [reviewId], (err, result) => {
+            if (err) {
+                res.status(500).send("Terjadi kesalahan server");
+                return;
+            }
+            if (result.length === 0) {
+                res.status(404).send("Review tidak ditemukan");
+                return;
+            }
+            res.json(result[0]);
+        });
+    } catch (error) {
+        res.status(500).send("Terjadi kesalahan server");
+    }
+}
+
+export const updateReviewById = (req, res) => {
+    try {
+        const reviewId = parseInt(req.params.id);
+        const { review } = req.body;
+        db.query("UPDATE reviews SET review = ? WHERE id = ?", [review, reviewId], (err, result) => {
+            if (err) {
+                res.status(500).send("Terjadi kesalahan server");
+                return;
+            }
+            if (result.affectedRows === 0) {
+                res.status(404).send("Review tidak ditemukan");
+                return;
+            }
+            res.sendStatus(204);
+        });
+    } catch (error) {
+        res.status(500).send("Terjadi kesalahan server");
+    }
+}

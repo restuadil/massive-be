@@ -91,3 +91,19 @@ export const getVetById = (req, res) => {
         res.status(500).send("Terjadi kesalahan server");
     }
 };
+
+export const updateVetById = (req, res) => {
+    const vetId = Number(req.params.id);
+    const newVet = req.body;
+    db.query("UPDATE veterinarians SET ? WHERE id = ?", [newVet, vetId], (err, result) => {
+        if (err) {
+            res.status(500).send("Terjadi kesalahan server");
+            return;
+        }
+        if (result.affectedRows === 0) {
+            res.status(404).send("Veterinarian tidak ditemukan");
+            return;
+        }
+        res.sendStatus(204);
+    })
+}
